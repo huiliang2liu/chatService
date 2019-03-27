@@ -83,5 +83,5 @@ def detail(request):
     return response(json.dumps(ujs))
 
 def friends(request):
-    fs=dict()
+    fs=None
     return response(json.dumps(fs))
