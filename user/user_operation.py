@@ -136,6 +136,7 @@ def changePassword(request):
                             u.password=np
                             try:
                                 u.save()
+                                token.delete()
                                 return response(json.dumps({"code":1,"msg":"修改密码成功"}))
                             except:
                                 pass
