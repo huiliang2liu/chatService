@@ -81,3 +81,7 @@ def detail(request):
     else:
         ujs={"code":1,"msg":"token is empty"}
     return response(json.dumps(ujs))
+
+def friends(request):
+    fs=dict()
+    return response(json.dumps(fs))
