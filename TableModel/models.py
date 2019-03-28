@@ -20,8 +20,8 @@ class HxTable(models.Model):
     password = models.TextField(blank=True, null=False, verbose_name="密码")
 class TokenTable(models.Model):
     token=models.TextField(primary_key=True,blank=True,null=False,verbose_name="Token")
-    id=models.IntegerField(primary_key=True,blank=True,null=False,verbose_name="用户ID")
-    time=models.IntegerField(blank=True,null=False,verbose_name="token生成的时间")
+    id=models.IntegerField(unique=True,blank=True,null=False,verbose_name="用户ID")
+    time=models.IntegerField(blank=True,null=False,verbose_name="token生成的时间",default=0)
 class FriendTable(models.Model):
     id=models.IntegerField(primary_key=True,blank=True,null=False,verbose_name="用户ID")
     friends=models.TextField(blank=True,null=False,verbose_name="朋友ID")
@@ -142,8 +142,8 @@ def insert_token(id,token):
     try:
         tok=TokenTable.objects.create(id=id,token=token)
         return tok
-    except:
-        print "insert token error"
+    except Exception,e:
+        print e
         pass
     return None
 def delete_token(id="",token=""):
