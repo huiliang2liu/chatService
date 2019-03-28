@@ -16,10 +16,12 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from user import urls
+import manage.urls as manage
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r"^user/",urls.url())
+    url(r"^user/",urls.url()),
+    url(r"^manage/",manage.url()),
 ]

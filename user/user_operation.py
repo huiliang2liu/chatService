@@ -1,9 +1,18 @@
+#-*- coding:utf-8 -*-
 from django.http import HttpResponse as response
 import json
 import TableModel.models as db
 import time
 import requests
 url = 'http://a1.easemob.com/1141170206178645/ceshi/'
+period_validity=3*24*60*60*1000
+def validation_token(token):
+    if token:
+        t = int(time.time() * 1000)
+        if t - token.time > period_validity:
+            return "token 失效"
+        return None
+    return "token error"
 
 def login(request):
     if request.GET:
@@ -70,14 +79,69 @@ def detail(request):
         token=request.POST["token"]
     if token:
         to=db.get_token(token=token)
-        if to:
-            u=db.get_user(id=to.id)
+        s=validation_token(to)
+        if s:
+            ujs = {"code": 1, "msg": s}
+        else:
+            u = db.get_user(id=to.id)
             if u:
                 ujs={"code":0,"user":{"name":u.nickname,"head":u.head}}
             else:
                 ujs={"code":1,"msg":"not found user"}
-        else:
-            ujs={"code":1,"msg":"token error"}
     else:
         ujs={"code":1,"msg":"token is empty"}
     return response(json.dumps(ujs))
+def logout(request):
+    if request.GET:
+        token=request.GET["token"]
+    else:
+        token=request.POST["token"]
+    if token:
+        to = db.get_token(token=token)
+        s=validation_token(to)
+        if s:
+            tjs = {"code": 1, "msg": s}
+        else:
+            try:
+                to.delete()
+                tjs = {"code": 0, "msg": "退出登录成功"}
+            except:
+                tjs = {"code": 0, "msg": "退出登录失败"}
+    else:
+        tjs = {"code": 1, "msg": "没有token"}
+
+    return response(json.dumps(tjs))
+def changePassword(request):
+    if request.GET:
+        js=request.GET["m"]
+    else:
+        js=request.POST["m"]
+    if js:
+        params=json.loads(js)
+        to=params["token"]
+        op=params["oldPassword"]
+        np=params["newPassword"]
+        if to and op and np:
+            if op==np:
+                return response(json.dumps({"code":1,"msg":"新旧密码不能相同"}))
+            else:
+                token = db.get_token(token=to)
+                s = validation_token(token)
+                if s:
+                    rjs = {"code": 1, "msg": s}
+                else:
+                    u = db.get_user(id=token.id)
+                    if u:
+                        if u.password==op:
+                            u.password=np
+                            try:
+                                u.save()
+                                token.delete()
+                                return response(json.dumps({"code":1,"msg":"修改密码成功"}))
+                            except:
+                                pass
+    return response(json.dumps({"code":1,"msg":"密码修改失败"}))
+
+def friends(request):
+    fs=None
+    return response(json.dumps(fs))

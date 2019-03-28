@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+import time
 
 # Create your models here.
 class UserTable(models.Model):
@@ -19,7 +20,11 @@ class HxTable(models.Model):
     password = models.TextField(blank=True, null=False, verbose_name="密码")
 class TokenTable(models.Model):
     token=models.TextField(primary_key=True,blank=True,null=False,verbose_name="Token")
+    id=models.IntegerField(unique=True,blank=True,null=False,verbose_name="用户ID")
+    time=models.IntegerField(blank=True,null=False,verbose_name="token生成的时间",default=0)
+class FriendTable(models.Model):
     id=models.IntegerField(primary_key=True,blank=True,null=False,verbose_name="用户ID")
+    friends=models.TextField(blank=True,null=False,verbose_name="朋友ID")
 
 def get_user(id=0,nickname=""):
     if id:
@@ -123,24 +128,29 @@ def insert_token(id,token):
     tok=get_token(id)
     if tok:
         try:
+            t=int(time.time()*1000)
             if tok.token==tok:
-                return tok
+                tok.time=t
             else:
                 tok.token=token
-                tok.save()
-                return tok
+                tok.time = t
+            tok.save()
+            return tok
         except:
             print "token error"
             pass
     try:
         tok=TokenTable.objects.create(id=id,token=token)
         return tok
-    except:
-        print "insert token error"
+    except Exception,e:
+        print e
         pass
     return None
-def delete_token(id):
-    tok=get_token(id=id)
+def delete_token(id="",token=""):
+    if id:
+        tok=get_token(id=id)
+    else :
+        tok=get_token(token=token)
     if tok:
         try:
             tok.delete()
@@ -149,4 +159,46 @@ def delete_token(id):
             print "delete token error"
             pass
     return None
+def get_friends(id):
+    try:
+        f_f=FriendTable.objects.get(id=id)
+        if f_f:
+            return f_f.split(",")
+        return None
+    except:
+        print "朋友数据查询错误"
+    return None
+def update_friends(id,friend_id):
+    f_friends=get_friends(id=id)
+    if f_friends:
+        f_friends.append(f_friends)
+    else:
+        f_friends={}
+        f_friends.append(f_friends)
+    try:
+        FriendTable.objects.create(id=id,friends=",".join(f_friends))
+        return True
+    except:
+        print "朋友更新错误"
+    return False
+def delete_friends(id,friend_id):
+    f_friends=get_friends(id=id)
+    if f_friends:
+        re=f_friends.remove(f_friends)
+        if re:
+            try:
+                if len(f_friends)>0:
+                    FriendTable.objects.update(id=id, friends=",".join(f_friends))
+                else:
+                    FriendTable.objects.get(id=id).delete()
+                return True
+            except:
+                print "删除朋友错误"
+            return False
+        return False
+    return False
+
+
+
+
 
