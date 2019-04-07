@@ -1,5 +1,6 @@
 from django.conf.urls import url
 import user_operation as u
+import hxChat.upload_file as up
 
 
 urlpatterns = [
@@ -9,6 +10,7 @@ urlpatterns = [
         url("friends", u.friends),
         url("logout", u.logout),
         url("changePassword", u.changePassword),
+        url("upload", up.upload),
     ]
 def url():
     return urlpatterns,"user","user"
